@@ -112,12 +112,61 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      setLoading(true);
+
+      // Update user name if provided
+      if (profileData.name && profileData.name !== user.name) {
+        await account.updateName(profileData.name);
+      }
+
+      // Update user preferences for additional fields
+      const prefs = {};
+
+      if (profileData.dateOfBirth) {
+        prefs.dateOfBirth = profileData.dateOfBirth;
+      }
+
+      if (profileData.gender) {
+        prefs.gender = profileData.gender;
+      }
+
+      if (Object.keys(prefs).length > 0) {
+        await account.updatePrefs(prefs);
+      }
+
+      // Refresh user data
+      const currentAccount = await account.get();
+      setUser(currentAccount);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Profile update error:", error);
+
+      let errorMessage = "Failed to update profile. Please try again.";
+
+      if (error.code === 400) {
+        errorMessage = "Invalid information provided";
+      }
+
+      return {
+        success: false,
+        error,
+        message: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
     register,
+    updateProfile,
     isAuthenticated: !!user,
   };
 

@@ -47,6 +47,27 @@ export const profileSchema = z.object({
     .string()
     .max(500, { message: "Bio must be less than 500 characters" })
     .optional(),
+  dateOfBirth: z
+    .string()
+    .min(1, { message: "Date of birth is required" })
+    .refine(
+      (date) => {
+        const today = new Date();
+        const dob = new Date(date);
+        const age = today.getFullYear() - dob.getFullYear();
+        return age >= 13;
+      },
+      { message: "You must be at least 13 years old" }
+    ),
+  gender: z
+    .string()
+    .min(1, { message: "Gender is required" })
+    .refine(
+      (val) => ["male", "female", "other", "prefer_not_to_say"].includes(val),
+      {
+        message: "Please select a valid option",
+      }
+    ),
 });
 
 export const passwordChangeSchema = z
